@@ -42,6 +42,7 @@ type Query {
   findAllUser: [User!]!
   getUserByID(id: String!): User!
   appointment(id: String!): Appt!
+  appointments: [Appt!]!
 }
 
 type Mutation {

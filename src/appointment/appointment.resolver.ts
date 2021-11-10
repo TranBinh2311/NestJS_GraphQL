@@ -22,11 +22,11 @@ export class AppointmentResolver {
     return this.apptService.appointments();
   }
 
-  @Query(() => Appt, { name: 'appointmentsByUser' })
-  // @UsePipes(new ValidationPipe())
-  async appointmentsByUser(@Args('filter') args: getApptsDTO) {
-    return this.apptService.appointmentsByUser(args);
-  }
+  // @Query(() => Appt, { name: 'appointmentsByUser' })
+  // // @UsePipes(new ValidationPipe())
+  // async appointmentsByUser(@Args('filter') args: getApptsDTO) {
+  //   return this.apptService.appointmentsByUser(args);
+  // }
 
   @Mutation(() => Appt, { name: 'createAppt' })
   // @UsePipes(new ValidationPipe())

@@ -1,12 +1,12 @@
-import { UsersResolver } from './users.resolver';
-import { UsersService } from './users.service'
+// import { UsersResolver } from './users.resolver';
+// import { UsersService } from './users.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { LoggerService } from '../logger/logger.service'
 import { Role, User } from "@prisma/client";
 import { NotFoundException, INestApplication, BadRequestException } from '@nestjs/common';
 import { PrismaClientValidationError, PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateUserInput } from './dto/create-user.input';
+// import { CreateUserInput } from './dto/create-user.input';
 import { create } from 'domain';
 
 
