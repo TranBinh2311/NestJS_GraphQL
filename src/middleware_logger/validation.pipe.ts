@@ -7,19 +7,19 @@ import {
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
-import { LoggerService } from './../logger/logger.service';
+import { LoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class ValidationPipe implements PipeTransform<any> {
-    private readonly logger: LoggerService = new Logger(ValidationPipe.name);
+    constructor(private class_name : any ){}
+    private readonly logger: LoggerService = new Logger(this.class_name.name);
 
     async transform(value: any, { metatype }: ArgumentMetadata) {
         if (value instanceof Object && this.isEmpty(value)) {
             throw new BadRequestException(
-                'Validation failed: No body submitted',
+                'Validation body failed: No body submitted',
             );
         }
-
         if (!metatype || !this.toValidate(metatype)) {
             return value;
         }
@@ -27,10 +27,10 @@ export class ValidationPipe implements PipeTransform<any> {
         const errors = await validate(object);
         if (errors.length > 0) {
             this.logger.error(
-                `Validation failed: ${this.formatErrors(errors)}`,
+                `Validation input failed: ${this.formatErrors(errors)}`,
             );
             throw new BadRequestException(
-                `Validation failed: ${this.formatErrors(errors)}`,
+                `Validation input failed: ${this.formatErrors(errors)}`,
             );
         }
         return value;

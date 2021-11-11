@@ -4,22 +4,26 @@ import {
   MaxLength,
   IsNumber,
   Length,
+  IsDate,
+  IsDateString,
+  IsISO8601,
 } from 'class-validator';
 import { InputType, Field } from '@nestjs/graphql';
+import { IsOptional } from 'class-validator';
 
 @InputType()
 export class CreateAppointmentInput {
-  @IsNotEmpty({ message: 'The user_id is empty' })
-  @Field(() => String, { nullable: false })
-  readonly user_id: string;
+  @IsOptional()
+  @Field(() => String, { nullable: true })
+  user_id: string;
 
-  @IsString({ message: 'The start_time  must be string' })
-  @IsNotEmpty({ message: 'The start_time is empty' })
+  @IsString({ message: 'The start_time  must be string'})
+  @IsISO8601({strict: true}, {message: "The start_time  must be ISO8601 format" } )
   @Field(() => String, { nullable: false }) 
   readonly start_time: string;
 
   @IsString({ message: 'The end_time must be string' })
-  @IsNotEmpty({ message: 'The end_time is empty' })
+  @IsISO8601({strict: true}, {message: "The end_time  must be ISO8601 format" } )
   @Field(() => String, { nullable: false }) 
   readonly end_time: string;
 

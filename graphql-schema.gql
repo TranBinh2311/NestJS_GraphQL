@@ -39,16 +39,18 @@ type User {
 }
 
 type Query {
+  who: User!
   findAllUser: [User!]!
   getUserByID(id: String!): User!
-  appointment(id: String!): Appt!
-  appointments: [Appt!]!
+  get_appointment_by_id(id: String!): Appt!
+  all_appointments: [Appt!]!
 }
 
 type Mutation {
   createUser(input: CreateUserInput!): User!
   updateUser(input: UpdateUserInput!, id: String!): User!
   deleteUser(id: String!): User!
+  login(input: UserLoginInput!): String!
   createAppt(input: CreateAppointmentInput!): Appt!
   updateAppt(input: UpdateAppointmentInput!, id: String!): Appt!
   deleteAppt(id: String!): Appt!
@@ -69,8 +71,13 @@ input UpdateUserInput {
   birthdate: String
 }
 
+input UserLoginInput {
+  email: String!
+  password: String!
+}
+
 input CreateAppointmentInput {
-  user_id: String!
+  user_id: String
   start_time: String!
   end_time: String!
   time_zone: String!

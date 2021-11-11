@@ -48,5 +48,6 @@ export class User extends BaseModel {
     nullable: true,
   })
   @HideField()
+  
   password: string;
 }

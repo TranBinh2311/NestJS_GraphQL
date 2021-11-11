@@ -4,6 +4,7 @@ import { UpdateAppointmentInput } from './dto/update-appointment.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoggerService } from '../logger/logger.service';
 import { getApptsDTO } from './dto/get_app.dto';
+import { User } from '../model/user.model';
 
 @Injectable()
 export class AppointmentService {
@@ -13,19 +14,25 @@ export class AppointmentService {
 
   // Get a single appointment
 
-  async appointment(id: string) {
-    this.mess = 'Tried to access an appointment that does not exist';
+  async appointment(user: User, id: string) {
     const appt = await this.prisma.appointment.findUnique({
       where: { id },
-      include: {
-        user: true,
-      },
     });
 
     if (!appt) {
-      this.logger.warn(`${this.mess}`);
-      throw new NotFoundException(`${this.mess}`);
+      this.logger.warn(`id('${id}') of appointment is invalid`);
+      throw new NotFoundException(`id('${id}') of appointment is invalid`);
     }
+
+    const checked = appt.user_id === user.id;
+    if (checked === false) {
+      this.logger.warn(`${user.email} don't have permisson`);
+      throw new NotFoundException(`${user.email} don't have permisson`);
+    }
+
+    if (appt !== null && checked === true)
+      this.logger.log(`Get information successfully`);
+
     return appt;
   }
 
@@ -76,56 +83,67 @@ export class AppointmentService {
   }
 
   // Create an appointment
-  async createAppt(input: CreateAppointmentInput) {
-    this.mess = 'Tried to access an user that does not exist when creating app';
-    const userExist = await this.prisma.user.findUnique({
-      where: { id: input.user_id },
-    });
-
-    if (!userExist) {
-      this.logger.warn(`${this.mess}`);
-      throw new NotFoundException(`${this.mess}`);
-    }
-    // const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return await this.prisma.appointment.create({
+  async createAppt(user: User, input: CreateAppointmentInput) {
+    input.user_id = user.id;
+    const created_appt = await this.prisma.appointment.create({
       data: input,
     });
+    if (created_appt) this.logger.log(`Created Appointment Succesfully`);
+    return created_appt;
   }
 
   // Update an appointment
-  async updateAppt(id: string, params: UpdateAppointmentInput) {
-    this.mess =
-      'Tried to access an appointment that does not exist when updating acc';
-    const appExist = await this.prisma.appointment.findUnique({
+  async updateAppt(user: User, id: string, params: UpdateAppointmentInput) {
+    const appt = await this.prisma.appointment.findUnique({
       where: { id },
     });
 
-    if (!appExist) {
-      this.logger.warn(`${this.mess}`);
-      throw new NotFoundException(`${this.mess}`);
+    if (!appt) {
+      this.logger.warn(`id('${id}') of appointment is invalid`);
+      throw new NotFoundException(`id('${id}') of appointment is invalid`);
     }
-    return await this.prisma.appointment.update({
+
+    const checked = appt.user_id === user.id;
+    if (checked === false) {
+      this.logger.warn(`${user.email} don't have permisson`);
+      throw new NotFoundException(`${user.email} don't have permisson`);
+    }
+
+    const updated_app = await this.prisma.appointment.update({
       where: { id },
       data: { ...params },
     });
+
+    if (updated_app) this.logger.log(`Updated appoinment successfully`);
+
+    return updated_app;
   }
 
   // delete an appointment
-  async deleteAppt(id: string) {
-    this.mess =
-      'Tried to access an apponiment that does not exist when deleting user';
-    const appExist = await this.prisma.appointment.findUnique({
+  async deleteAppt(user: User, id: string) {
+    const appt = await this.prisma.appointment.findUnique({
       where: { id },
     });
 
-    if (!appExist) {
-      this.logger.warn(`${this.mess}`);
-      throw new NotFoundException(`${this.mess}`);
+    if (!appt) {
+      this.logger.warn(`id('${id}') of appointment is invalid`);
+      throw new NotFoundException(`id('${id}') of appointment is invalid`);
     }
-    return await this.prisma.appointment.delete({
+
+    const checked = appt.user_id === user.id;
+    if (checked === false) {
+      this.logger.warn(`${user.email} don't have permisson`);
+      throw new NotFoundException(`${user.email} don't have permisson`);
+    }
+
+    const deteled_app = await this.prisma.appointment.delete({
       where: {
         id,
       },
     });
+
+    if (deteled_app) this.logger.log(`Deleted appoinment successfully`);
+
+    return deteled_app;
   }
 }
