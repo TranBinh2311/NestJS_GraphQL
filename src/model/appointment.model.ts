@@ -4,12 +4,12 @@ import { BaseModel } from './base.model';
 
 @ObjectType()
 export class Appt extends BaseModel {
-  @Field(() => String, {
+  @Field(() => Date, {
     nullable: false,
   })
   start_time: Date;
 
-  @Field(() => String, {
+  @Field(() => Date, {
     nullable: false,
   })
   end_time: Date;
@@ -17,7 +17,7 @@ export class Appt extends BaseModel {
   @Field(() => String, {
     nullable: true,
   })
-  time_zone: String;
+  time_zone: string;
 
 
   @Field(() => User, {
@@ -28,5 +28,5 @@ export class Appt extends BaseModel {
   @Field(() => String, {
     nullable: true,
   })
-  user_id: String;
+  user_id: string;
 }

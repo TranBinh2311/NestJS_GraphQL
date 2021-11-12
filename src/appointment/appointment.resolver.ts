@@ -3,12 +3,13 @@ import { AppointmentService } from './appointment.service';
 import { Appt } from '../model/appointment.model';
 import { CreateAppointmentInput } from './dto/create-appointment.input';
 import { UpdateAppointmentInput } from './dto/update-appointment.input';
-import { getApptsDTO } from './dto/get_app.dto';
+import { getApptsDTO } from './dto/get-app.dto';
 import { User } from '../model/user.model';
 import { PrismaService } from '../prisma/prisma.service';
 import { UseGuards, UsePipes } from '@nestjs/common';
 import { ValidationPipe } from 'src/middleware_logger/validation.pipe';
 import { AuthGaurd } from '../auth/auth.gaurd';
+import { Appointment } from '@prisma/client';
 
 
 @Resolver(() => Appt)
@@ -27,12 +28,16 @@ export class AppointmentResolver {
     return this.apptService.appointments();
   }
 
-  // @Query(() => Appt, { name: 'appointmentsByUser' })
-  // // @UsePipes(new ValidationPipe())
-  // async appointmentsByUser(@Args('filter') args: getApptsDTO) {
-  //   return this.apptService.appointmentsByUser(args);
-  // }
+  @Query(() => Appt, { name: 'appointmentsByUser' })
+  @UseGuards(new AuthGaurd())
+  @UsePipes(new ValidationPipe(AppointmentResolver))
+  async appointmentsByUser(@Context('user') user: User, @Args('input') input: getApptsDTO) {
+    return this.apptService.appointmentsByUser(user, input);
+  }
 
+
+
+  
   @Mutation(() => Appt, { name: 'createAppt' })
   @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(AppointmentResolver))

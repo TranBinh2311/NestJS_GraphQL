@@ -14,12 +14,12 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { Appt } from '../model/appointment.model';
 import { PrismaService } from '../prisma/prisma.service';
-import { Req, UseGuards, UsePipes } from '@nestjs/common';
+import { UseGuards, UsePipes, Logger } from '@nestjs/common';
 import { ValidationPipe } from '../middleware_logger/validation.pipe';
 import { UserLoginInput } from './dto/login.dto';
-import { user_token } from '../../dist/users/interface/login.response';
 import { AuthGaurd } from '../auth/auth.gaurd';
-import { Request } from 'express';
+import { MyContext } from '../types/myContext';
+
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -42,9 +42,9 @@ export class UsersResolver {
   }
 
   @Query(() => User, { name: 'getUserByID' })
-  @UsePipes(new ValidationPipe(UsersResolver))
-  async post(@Args('id') id: string) {
-    return this.usersService.user(id);
+  @UseGuards(new AuthGaurd())
+  async findById(@Context('user') user: User) {
+    return this.usersService.user(user.id);
   }
 
   @Mutation(() => User, { name: 'createUser' })
@@ -54,15 +54,17 @@ export class UsersResolver {
   }
 
   @Mutation(() => User, { name: 'updateUser' })
+  @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(UsersResolver))
-  async update(@Args('id') id: string, @Args('input') args: UpdateUserInput) {
-    return this.usersService.updateUser(id, args);
+  async update(@Context('user') user: User, @Args('input') args: UpdateUserInput) {
+    return this.usersService.updateUser(user.id, args);
   }
 
   @Mutation(() => User, { name: 'deleteUser' })
+  @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(UsersResolver))
-  async delete(@Args('id') id: string) {
-    return this.usersService.deleteUser(id);
+  async delete(@Context('user') user: User) {
+    return this.usersService.deleteUser(user.id);
   }
 
   @ResolveField(() => Appt, { nullable: true })
@@ -73,10 +75,16 @@ export class UsersResolver {
   }
 
   @Mutation(()=> String, { name: 'login' })
-  async login(@Args('input') agrs: UserLoginInput)
+  async login(
+    @Args('input') agrs: UserLoginInput,
+    @Context('ctx') ctx: MyContext
+  )
   {
-    return this.usersService.login(agrs);
+    return this.usersService.login(agrs, ctx);
   }
 
- 
+  @Mutation(()=>Boolean, {nullable: true})
+  async logout(@Context('ctx') ctx: MyContext) {
+    return this.usersService.logout(ctx);
+  }
 }

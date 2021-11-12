@@ -3,7 +3,7 @@ import { CreateAppointmentInput } from './dto/create-appointment.input';
 import { UpdateAppointmentInput } from './dto/update-appointment.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoggerService } from '../logger/logger.service';
-import { getApptsDTO } from './dto/get_app.dto';
+import { getApptsDTO } from './dto/get-app.dto';
 import { User } from '../model/user.model';
 
 @Injectable()
@@ -38,8 +38,7 @@ export class AppointmentService {
 
   async appointments() {
     return (
-      await this,
-      this.prisma.appointment.findMany({
+      await this.prisma.appointment.findMany({
         include: {
           user: true,
         },
@@ -48,8 +47,7 @@ export class AppointmentService {
   }
 
   //get list appointment by user
-  async appointmentsByUser(filter: getApptsDTO) {
-    this.mess = 'Tried to access an appointment that does not exist';
+  async appointmentsByUser(user: User, filter: getApptsDTO) {
     const userExist = await this.prisma.user.findUnique({
       where: {
         id: filter.user_id,
@@ -57,8 +55,14 @@ export class AppointmentService {
     });
 
     if (!userExist) {
-      this.logger.warn(`${this.mess}`);
-      throw new NotFoundException(`${this.mess}`);
+      this.logger.warn(`id('${filter.user_id}') of appointment is invalid`);
+      throw new NotFoundException(`id('${filter.user_id}') of appointment is invalid`);
+    }
+
+    const checked = (userExist.id === user.id);
+    if (checked === false) {
+      this.logger.warn(`${user.email} don't have permisson`);
+      throw new NotFoundException(`${user.email} don't have permisson`);
     }
 
     const startDate = new Date(Date.parse(filter.timeFrom));
@@ -84,9 +88,17 @@ export class AppointmentService {
 
   // Create an appointment
   async createAppt(user: User, input: CreateAppointmentInput) {
-    input.user_id = user.id;
+    //input.user_id = user.id;
+    if(!user){
+        throw new NotFoundException(`Not Found ${user.email}`)
+        this.logger.warn(`Not Found ${user.email}`);
+    }
+
     const created_appt = await this.prisma.appointment.create({
-      data: input,
+      data: {
+        ...input,
+        user_id: user.id
+      }
     });
     if (created_appt) this.logger.log(`Created Appointment Succesfully`);
     return created_appt;

@@ -34,6 +34,11 @@ export class User extends BaseModel {
   })
   last_name?: string;
 
+  @Field(() => Date, {
+    nullable: true,
+  })
+  birthdate?: Date;
+
   @Field(() => String, {
     nullable: false,
   })
@@ -44,10 +49,16 @@ export class User extends BaseModel {
   })
   appointments: Appt[];
 
-  @Field(() => String, {
+  @Field(() => Boolean, {
     nullable: true,
   })
-  @HideField()
-  
+  // @HideField()
+  confirmed: boolean;
+
+
+  @Field(() => String, {
+    nullable: false,
+  })
+  // @HideField()
   password: string;
 }

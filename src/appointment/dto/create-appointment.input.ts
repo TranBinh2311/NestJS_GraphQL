@@ -13,10 +13,7 @@ import { IsOptional } from 'class-validator';
 
 @InputType()
 export class CreateAppointmentInput {
-  @IsOptional()
-  @Field(() => String, { nullable: true })
-  user_id: string;
-
+  
   @IsString({ message: 'The start_time  must be string'})
   @IsISO8601({strict: true}, {message: "The start_time  must be ISO8601 format" } )
   @Field(() => String, { nullable: false }) 

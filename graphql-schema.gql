@@ -10,8 +10,8 @@ type Appt {
 
   """Identifies the date and time when the object was last updated."""
   updated_at: DateTime!
-  start_time: String!
-  end_time: String!
+  start_time: DateTime!
+  end_time: DateTime!
   time_zone: String
   user: User
   user_id: String
@@ -33,24 +33,34 @@ type User {
   email: String!
   first_name: String
   last_name: String
+  birthdate: DateTime
   role: String!
   appointments: [Appt!]
-  password: String
+  confirmed: Boolean
+  password: String!
 }
 
 type Query {
   who: User!
   findAllUser: [User!]!
-  getUserByID(id: String!): User!
+  getUserByID: User!
   get_appointment_by_id(id: String!): Appt!
   all_appointments: [Appt!]!
+  appointmentsByUser(input: getApptsDTO!): Appt!
+}
+
+input getApptsDTO {
+  user_id: String!
+  timeFrom: String!
+  timeTo: String!
 }
 
 type Mutation {
   createUser(input: CreateUserInput!): User!
-  updateUser(input: UpdateUserInput!, id: String!): User!
-  deleteUser(id: String!): User!
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser: User!
   login(input: UserLoginInput!): String!
+  logout: Boolean
   createAppt(input: CreateAppointmentInput!): Appt!
   updateAppt(input: UpdateAppointmentInput!, id: String!): Appt!
   deleteAppt(id: String!): Appt!
@@ -77,14 +87,12 @@ input UserLoginInput {
 }
 
 input CreateAppointmentInput {
-  user_id: String
   start_time: String!
   end_time: String!
   time_zone: String!
 }
 
 input UpdateAppointmentInput {
-  user_id: String
   start_time: String
   end_time: String
   time_zone: String

@@ -29,7 +29,7 @@ export class CreateUserInput {
   @IsString({message: "Birthdate must be string"})
   @Field(() => String, { nullable: true })
   @IsOptional() 
-  readonly birthdate?: string;
+  birthdate?: string;
 
   @IsEnum(EnumUserRole)
   @IsNotEmpty({message: "EnumUserRole is not empty"})
