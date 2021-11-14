@@ -9,7 +9,7 @@ export const sendEmail = async (email: string, link: string) => {
     secure: true, // true for 465, false for other ports
     auth: {
       user: 'apikey', // generated ethereal user
-      pass: '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', // generated ethereal password
+      pass: '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', // generated ethereal password
     },
   });
 
@@ -21,7 +21,7 @@ export const sendEmail = async (email: string, link: string) => {
     text: 'Hello world! Please click the link to verify register!!!', // plain text body
     html: `<b>Hello world?</b> <a href="${link}">link verify</a>`, // html body
   });
-
+  //console.log(email);
   //console.log('Message sent: %s', info.messageId);
   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
 };

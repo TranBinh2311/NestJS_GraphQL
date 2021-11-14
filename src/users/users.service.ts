@@ -3,9 +3,6 @@ import {
   NotFoundException,
   Logger,
   BadRequestException,
-  ExceptionFilter,
-  HttpException,
-  ArgumentsHost,
 } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
@@ -14,14 +11,14 @@ import { User } from '.prisma/client';
 import { LoggerService } from '../logger/logger.service';
 import * as jwt from 'jsonwebtoken';
 import { UserLoginInput } from './dto/login.dto';
-import { Response, Request, response } from 'express';
+import { Response, Request, } from 'express';
 import { sendEmail } from '../utils/sendEmail';
 import { confirmEmailLink } from '../utils/confirmEmailLink';
 import { redis } from '../redis';
 import { PasswordService } from 'src/auth/password.service';
 import * as bcrypt from 'bcrypt'
-import { MyContext } from '../types/myContext';
-import * as session from 'express-session';
+import MyContext from '../types/myContext';
+import { signJwt } from '../utils/jwt.utils';
 import {CookieOptions} from 'express'
 
 const cookieOptions : CookieOptions  = {
@@ -63,7 +60,9 @@ export class UsersService {
       },
     });
     /*--------------------------------------------------------------------------------*/
-    await sendEmail(input.email, await confirmEmailLink(user_created.id));
+    console.log(user_created.email);
+    
+    await sendEmail(user_created.email, await confirmEmailLink(user_created.id));
     /*--------------------------------------------------------------------------------*/
     if (user_created)
       this.logger.log(`CREATED successfull ${user_created.email}  !!!`);
@@ -136,12 +135,8 @@ export class UsersService {
     return user_deleted;
   }
 
-  async createToken({ id, email, first_name, last_name, role }) {
-    return jwt.sign(
-      { id, email, first_name, last_name, role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE },
-    );
+  async createToken({ id, email, first_name, last_name}) {
+    return signJwt({ id, email, first_name, last_name});  
   }
 
   async login(input: UserLoginInput, ctx: MyContext) {
@@ -159,28 +154,28 @@ export class UsersService {
       throw new NotFoundException(`${'Wrong Password'}`);
     }
 
-    if( userExist.confirmed === false)
-    {
-        this.logger.warn(`User must confirmed before log in`);
+    // if( userExist.confirmed === false)
+    // {
+    //     this.logger.warn(`User must confirmed before log in`);
+    //     throw new NotFoundException(`You must confirmed before log in`)
+    // }
 
-        throw new NotFoundException(`You must confirmed before log in`)
-    }
-
-    // req.session.cookie.secure.valueOf.name =  userExist.id;
-    ctx.res.cookie('bitech', jwt , cookieOptions);
-
-    const { id, email, first_name, last_name, role } = userExist;
+    const { id, email, first_name, last_name } = userExist;
     this.logger.log(`${'Login sucessfully'}`);
-    return this.createToken({ id, email, first_name, last_name, role });
+
+    const jwt = await this.createToken({ id, email, first_name, last_name});
+
+    ctx.res.cookie(process.env.COOKIE_NAME, jwt ,cookieOptions);
+    return jwt;
   }
 
   async logout(ctx: MyContext){
-      await ctx.req.session.destroy( async (err)=>{
-            console.log(err);
-            return false;       
-      })
-
-      await ctx.res.clearCookie('bitech')
+      // await ctx.req.session.destroy( async (err)=>{
+      //       console.log(err);
+      //       return false;       
+      // })
+    
+      await ctx.res.clearCookie(process.env.COOKIE_NAME);
       return true;
   }
 

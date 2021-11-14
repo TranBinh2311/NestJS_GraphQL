@@ -10,6 +10,7 @@ import { UseGuards, UsePipes } from '@nestjs/common';
 import { ValidationPipe } from 'src/middleware_logger/validation.pipe';
 import { AuthGaurd } from '../auth/auth.gaurd';
 import { Appointment } from '@prisma/client';
+import MyContext  from '../types/myContext';
 
 
 @Resolver(() => Appt)
@@ -18,50 +19,45 @@ export class AppointmentResolver {
     private prisma: PrismaService) {}
 
   @Query(() => Appt, { name: 'get_appointment_by_id' })
-  @UseGuards(new AuthGaurd())
-  async appointment(@Context('user') user: User, @Args('id') id: string) {
-    return this.apptService.appointment(user, id);
+  // @UseGuards(new AuthGaurd())
+  async appointment(@Context() context: MyContext, @Args('id') id: string) {
+    return this.apptService.appointment(context.req.user, id);
   }
 
-  @Query(() => [Appt], { name: 'all_appointments' })
-  async appointments() {
-    return this.apptService.appointments();
-  }
+  // @Query(() => [Appt], { name: 'all_appointments' })
+  // async appointments() {
+  //   return this.apptService.appointments();
+  // }
 
   @Query(() => Appt, { name: 'appointmentsByUser' })
-  @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(AppointmentResolver))
-  async appointmentsByUser(@Context('user') user: User, @Args('input') input: getApptsDTO) {
-    return this.apptService.appointmentsByUser(user, input);
+  async appointmentsByUser(@Context() context: MyContext, @Args('input') input: getApptsDTO) {
+    return this.apptService.appointmentsByUser(context.req.user, input);
   }
 
 
 
   
   @Mutation(() => Appt, { name: 'createAppt' })
-  @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(AppointmentResolver))
-  async create(@Context('user') user: User, @Args('input') input: CreateAppointmentInput) {
-    
-    return this.apptService.createAppt(user, input);
+  async create(@Context() context: MyContext, @Args('input') input: CreateAppointmentInput) {
+    return this.apptService.createAppt(context.req.user, input);
   }
 
   @Mutation(() => Appt, { name: 'updateAppt' })
-  @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(AppointmentResolver))
   async update(
-    @Context('user') user: User,
+    @Context() context: MyContext,
     @Args('id') id: string,
     @Args('input') args: UpdateAppointmentInput,
   ) {
-    return this.apptService.updateAppt(user, id, args);
+    return this.apptService.updateAppt(context.req.user ,id, args);
   }
 
   @Mutation(() => Appt, { name: 'deleteAppt' })
-  @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(AppointmentResolver))
-  async delete(@Context('user') user: User,@Args('id') id: string) {
-    return this.apptService.deleteAppt(user,id);
+  async delete(@Context() context: MyContext,@Args('id') id: string) {
+    return this.apptService.deleteAppt(context.req.user,id);
   }
 
   @ResolveField(()=> User, {nullable: true})

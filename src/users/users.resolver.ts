@@ -3,7 +3,6 @@ import {
   Query,
   Mutation,
   Args,
-  Int,
   Parent,
   ResolveField,
   Context,
@@ -14,11 +13,12 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { Appt } from '../model/appointment.model';
 import { PrismaService } from '../prisma/prisma.service';
-import { UseGuards, UsePipes, Logger } from '@nestjs/common';
+import { UseGuards, UsePipes } from '@nestjs/common';
 import { ValidationPipe } from '../middleware_logger/validation.pipe';
 import { UserLoginInput } from './dto/login.dto';
 import { AuthGaurd } from '../auth/auth.gaurd';
-import { MyContext } from '../types/myContext';
+import MyContext  from '../types/myContext';
+
 
 
 @Resolver(() => User)
@@ -29,10 +29,9 @@ export class UsersResolver {
   ) {}
 
   
-  @Query(()=>User, { name: 'who' } )
-  @UseGuards(new AuthGaurd())
-  async me(@Context('user') user: User){
-    return user;
+  @Query(() => User, { nullable: true })
+  async me(@Context() context: MyContext) {
+    return context.req.user;
   }
 
 
@@ -42,9 +41,8 @@ export class UsersResolver {
   }
 
   @Query(() => User, { name: 'getUserByID' })
-  @UseGuards(new AuthGaurd())
-  async findById(@Context('user') user: User) {
-    return this.usersService.user(user.id);
+  async findById(@Context() context: MyContext) {
+    return this.usersService.user(context.req.user.id);
   }
 
   @Mutation(() => User, { name: 'createUser' })
@@ -54,17 +52,15 @@ export class UsersResolver {
   }
 
   @Mutation(() => User, { name: 'updateUser' })
-  @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(UsersResolver))
-  async update(@Context('user') user: User, @Args('input') args: UpdateUserInput) {
-    return this.usersService.updateUser(user.id, args);
+  async update(@Context() context: MyContext, @Args('input') args: UpdateUserInput) {
+    return this.usersService.updateUser(context.req.user.id, args);
   }
 
   @Mutation(() => User, { name: 'deleteUser' })
-  @UseGuards(new AuthGaurd())
   @UsePipes(new ValidationPipe(UsersResolver))
-  async delete(@Context('user') user: User) {
-    return this.usersService.deleteUser(user.id);
+  async delete(@Context() context: MyContext) {
+    return this.usersService.deleteUser(context.req.user.id);
   }
 
   @ResolveField(() => Appt, { nullable: true })
@@ -77,14 +73,14 @@ export class UsersResolver {
   @Mutation(()=> String, { name: 'login' })
   async login(
     @Args('input') agrs: UserLoginInput,
-    @Context('ctx') ctx: MyContext
+    @Context() ctx: MyContext
   )
   {
     return this.usersService.login(agrs, ctx);
   }
 
-  @Mutation(()=>Boolean, {nullable: true})
-  async logout(@Context('ctx') ctx: MyContext) {
+  @Mutation(()=>Boolean, {name: 'logout', nullable: true})
+  async logout(@Context() ctx: MyContext) {
     return this.usersService.logout(ctx);
   }
 }
