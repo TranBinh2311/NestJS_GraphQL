@@ -3,7 +3,7 @@ import { Response as Res } from 'express';
 import { UsersService } from './users.service';
 
 
-@Controller('users')
+@Controller('user')
 export class UsersController {
     constructor(private  usersService: UsersService){}
     @Get('/confirm/:id')
@@ -11,6 +11,4 @@ export class UsersController {
     confirmEmai(@Param('id') id:string, @Response() res: Res ) {
         return this.usersService.confirmEmai(id , res)
     }
-
-    
 }

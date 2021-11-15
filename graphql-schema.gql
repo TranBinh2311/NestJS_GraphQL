@@ -45,6 +45,7 @@ type Query {
   findAllUser: [User!]!
   getUserByID: User!
   get_appointment_by_id(id: String!): Appt!
+  all_appointments: [Appt!]!
   appointmentsByUser(input: getApptsDTO!): Appt!
 }
 

@@ -36,9 +36,10 @@ export class AppointmentService {
     return appt;
   }
 
-  async appointments() {
+  async appointments(user: User) {
     return (
       await this.prisma.appointment.findMany({
+        where: {user_id: user.id},
         include: {
           user: true,
         },
