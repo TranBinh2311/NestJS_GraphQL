@@ -15,7 +15,7 @@ import { Response, Request } from 'express';
 import { sendEmail } from '../utils/sendEmail';
 import { confirmEmailLink } from '../utils/confirmEmailLink';
 import { redis } from '../redis';
-import { PasswordService } from 'src/auth/password.service';
+import { PasswordService } from '../auth/password.service';
 import * as bcrypt from 'bcrypt';
 import MyContext from '../types/myContext';
 import { signJwt } from '../utils/jwt.utils';
@@ -35,7 +35,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private passwordService: PasswordService,
-  ) { }
+  ) {}
   private readonly logger: LoggerService = new Logger(UsersService.name);
 
   // Create a new user
@@ -74,7 +74,7 @@ export class UsersService {
       await confirmEmailLink(user_created.id),
     );
     console.log(await confirmEmailLink(user_created.id));
-    
+
     /*--------------------------------------------------------------------------------*/
     if (user_created)
       this.logger.log(
@@ -123,7 +123,6 @@ export class UsersService {
 
   // Update a user
   async updateUser(id: string, params: UpdateUserInput): Promise<User> {
-
     const user_updated = await this.prisma.user.update({
       where: { id },
       data: { ...params },
@@ -140,12 +139,12 @@ export class UsersService {
   }
 
   // delete an user
-  async deleteUser(ctx : MyContext) {
+  async deleteUser(ctx: MyContext) {
     const id = ctx.req.user.id;
     const user_deleted = await this.prisma.user.delete({
       where: { id },
     });
-    if (user_deleted){
+    if (user_deleted) {
       this.logger.log(
         log_form(
           'deleteUser',
@@ -155,7 +154,7 @@ export class UsersService {
       );
       this.logout(ctx);
     }
-      
+
     return user_deleted;
   }
 
@@ -179,10 +178,11 @@ export class UsersService {
       this.logger.warn(`${'Wrong Password'}`);
       throw new NotFoundException(`${'Wrong Password'}`);
     }
-    if( userExist.confirmed === false)
-    {
-        this.logger.warn(`User must confirmed before log in`);
-        throw new NotFoundException(`You must confirmed before logging in. Please check in your email`)
+    if (userExist.confirmed === false) {
+      this.logger.warn(`User must confirmed before log in`);
+      throw new NotFoundException(
+        `You must confirmed before logging in. Please check in your email`,
+      );
     }
     const { id, email, first_name, last_name } = userExist;
     this.logger.log(`${'Login sucessfully'}`);
